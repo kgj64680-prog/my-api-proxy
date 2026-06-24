@@ -9,13 +9,16 @@ export default async function handler(req, res) {
       {
         headers: {
           'Content-Type': 'application/x-www-form-urlencoded',
-          'User-Agent': 'Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Mobile/15E148 Safari/604.1'
+          'Referer': `https://m.cgv.co.kr/Schedule/?theaterCode=${theaterCode}&date=${date}`,
+          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+          'X-Requested-With': 'XMLHttpRequest'
         }
       }
     );
     
     res.status(200).json(response.data);
   } catch (error) {
-    res.status(500).json({ error: "데이터를 가져오지 못했습니다." });
+    // 에러를 자세히 보기 위해 error.message를 출력합니다
+    res.status(500).json({ error: error.message });
   }
 }
