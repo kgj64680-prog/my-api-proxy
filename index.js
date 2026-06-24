@@ -1,30 +1,19 @@
-const chromium = require('@sparticuz/chromium-min');
-const puppeteer = require('puppeteer-core');
+const axios = require('axios');
 
 export default async function handler(req, res) {
   const { theaterCode, date } = req.query;
   
+  // 외부 무료 브라우저 렌더링 서비스(Browserless)를 활용합니다.
+  const browserlessUrl = 'https://chrome.browserless.io/content?token=YOUR_TOKEN_HERE';
+
   try {
-    const browser = await puppeteer.launch({
-      args: [...chromium.args, "--no-sandbox", "--disable-setuid-sandbox"],
-      executablePath: await chromium.executablePath(),
-      headless: chromium.headless,
+    const response = await axios.post(browserlessUrl, {
+      url: `https://m.cgv.co.kr/Schedule/?theaterCode=${theaterCode}&date=${date}`,
+      waitForSelector: 'body'
     });
-
-    const page = await browser.newPage();
-    await page.setUserAgent("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36");
     
-    // CGV 페이지 접속
-    await page.goto(`https://m.cgv.co.kr/Schedule/?theaterCode=${theaterCode}&date=${date}`, { waitUntil: 'networkidle2' });
-
-    // 데이터 추출
-    const data = await page.evaluate(() => {
-        return document.body.innerText; 
-    });
-
-    await browser.close();
-    res.status(200).json({ data: data });
+    res.status(200).json({ data: response.data });
   } catch (error) {
-    res.status(500).json({ error: "브라우저 실행 오류: " + error.message });
+    res.status(500).json({ error: "데이터 추출 실패: " + error.message });
   }
 }
