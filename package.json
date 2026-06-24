@@ -1,7 +1,4 @@
-{
-  "dependencies": {
-    "axios": "^1.6.0",
-    "puppeteer-core": "^21.0.0",
-    "@sparticuz/chromium-min": "^119.0.0"
-  }
+"dependencies": {
+  "axios": "^1.6.0",
+  "cheerio": "^1.0.0-rc.12"
 }
