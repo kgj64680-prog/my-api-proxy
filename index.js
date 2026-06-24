@@ -5,28 +5,26 @@ export default async function handler(req, res) {
   const { theaterCode, date } = req.query;
   
   try {
-    // 가상의 브라우저 실행
     const browser = await puppeteer.launch({
-      args: [...chromium.args, "--hide-scrollbars", "--disable-web-security"],
+      args: [...chromium.args, "--no-sandbox", "--disable-setuid-sandbox"],
       executablePath: await chromium.executablePath(),
-      headless: true,
+      headless: chromium.headless,
     });
 
     const page = await browser.newPage();
-    // CGV 모바일 페이지 접속 (사람처럼 보이게 함)
-    await page.setUserAgent("Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Mobile/15E148 Safari/604.1");
+    await page.setUserAgent("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36");
     
+    // CGV 페이지 접속
     await page.goto(`https://m.cgv.co.kr/Schedule/?theaterCode=${theaterCode}&date=${date}`, { waitUntil: 'networkidle2' });
 
-    // 시간표 데이터를 긁어오기
+    // 데이터 추출
     const data = await page.evaluate(() => {
-      // 여기에 CGV 페이지에서 시간표가 담긴 HTML 태그를 추출하는 자바스크립트 로직
-      return document.body.innerText; 
+        return document.body.innerText; 
     });
 
     await browser.close();
-    res.status(200).send(data);
+    res.status(200).json({ data: data });
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    res.status(500).json({ error: "브라우저 실행 오류: " + error.message });
   }
 }
