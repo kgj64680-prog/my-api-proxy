@@ -1,19 +1,17 @@
 const axios = require('axios');
 
 export default async function handler(req, res) {
-  const { theaterCode, date } = req.query;
-  
-  // 외부 무료 브라우저 렌더링 서비스(Browserless)를 활용합니다.
-  const browserlessUrl = 'https://chrome.browserless.io/content?token=YOUR_TOKEN_HERE';
+  const { date } = req.query; // 예: 20260624
+  const apiKey = 'dd2156824e31608e79408f1d3646e44a'; 
 
   try {
-    const response = await axios.post(browserlessUrl, {
-      url: `https://m.cgv.co.kr/Schedule/?theaterCode=${theaterCode}&date=${date}`,
-      waitForSelector: 'body'
-    });
+    // KOBIS API로 박스오피스 데이터를 가져옵니다 (영화 리스트 확보)
+    const url = `http://www.kobis.or.kr/kobisopenapi/webservice/rest/boxoffice/searchDailyBoxOfficeList.json?key=${apiKey}&targetDt=${date}`;
+    const response = await axios.get(url);
     
-    res.status(200).json({ data: response.data });
+    // 가져온 영화 리스트를 그대로 전달
+    res.status(200).json(response.data.boxOfficeResult.dailyBoxOfficeList);
   } catch (error) {
-    res.status(500).json({ error: "데이터 추출 실패: " + error.message });
+    res.status(500).json({ error: "API 요청 실패: " + error.message });
   }
 }
